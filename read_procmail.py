@@ -60,6 +60,3 @@ if __name__ == "__main__":
             f.write(line)
 
 
-#os.remove('/agroseek/www/wp-content/themes/twentyseventeen/projects_queue.json')
-#os.system('cp /agroseek/www/wp-content/themes/twentyseventeen/projects_queue_empty.json /agroseek/www/wp-content/themes/twentyseventeen/projects_queue.json')
-
