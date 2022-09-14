@@ -17,7 +17,7 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 - runscheduler.sh:      script to run the scheduler
 - scheduler.py:         scheduler script
 
-## Running the pipeline
+## Run the pipeline
 - to run: ./runscheduler.sh <metadata file> <project ID> <user ID> <MGE database>
   - (example)  ./runscheduler.sh sample_metadata_upload_2.xlsx myProject myUser metacompare
 - pipeline will either start immediately (if no other projects in the queue) or be added to the queue
