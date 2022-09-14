@@ -1,5 +1,5 @@
 #!/bin/bash
-cd '/agroseek/www/wp-includes/task_scheduler'
+cd 'argem_scheduler'
 
 if [ "$#" -ne 5 ]; then
     >&2 echo "wrong number of parameters!"
