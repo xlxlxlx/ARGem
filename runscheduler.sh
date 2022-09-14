@@ -1,5 +1,5 @@
 #!/bin/bash
-cd 'argem_scheduler'
+#cd 'argem_scheduler'
 
 if [ "$#" -ne 5 ]; then
     >&2 echo "wrong number of parameters!"
