@@ -8,7 +8,6 @@ join_method = 'outer'
 card_all_filename = 'card_all.tsv'
 mge_all_filename = 'mge_all.tsv'
 
-#filepath = '/agroseek/www/wp-includes/task_scheduler/userprojects/project_628bc6164c9c9_1655987522/annotations'
 
 if len(sys.argv) > 1:
     filepath = sys.argv[1]
