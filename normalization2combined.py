@@ -6,7 +6,6 @@ import os.path
 join_method = 'outer'
 df_project_filename = 'combined.clean.card.matches.quant.normalization'
 
-#filepath = '/agroseek/www/wp-includes/task_scheduler/userprojects/project_5f707efa8c1d7_1654099049/shortreads_output/'
 
 if len(sys.argv) > 1:
     filepath = sys.argv[1]
