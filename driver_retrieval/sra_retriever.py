@@ -1,16 +1,7 @@
-# Updated on 12/31/2021
-# added kevin's changes for checking mySQL table for previously retrieved
-# SRA. commented out for now since its unfunctional.  -josh
-
-# The following things needs to be edited when used:
-# 1. SRA Toolkit directory path 
-# 2. Output directory path/name
 
 '''
 File Structure (temp)
-
-agroseek/
-    - wwww/p-content/themes/scripts/
+    - driver_retrieval/
         - sra_retriever.py
         - SRA-Numbers
             - sra-log.tsv
@@ -463,7 +454,7 @@ if __name__ == "__main__":
     SeqRetr.run_retriever(verify_input=True, validate_data=True, task_id=task_id)
 
 
-
+# If store the retrieved SRA accession numbers, uncomment the following block
 # class SRARetriever:
 #     '''
 #     Class responsible for the retrieval and storage of SRA accession numbers from the MySQL database.
