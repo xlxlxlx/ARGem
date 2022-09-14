@@ -17,11 +17,11 @@ class DiamondDriver:
         # this is the project folder the results are outputted
         self.proj_path = proj_path
 
-        self.pipeline_path = "/agroseek/www/wp-content/themes/twentyseventeen/scripts/diamond_pipeline/diamond-annotation/"
+        self.pipeline_path = "diamond-annotation/"
         self.SRA_path = f"{proj_path}/raw_sequence_data"
 
     def run_diamond(self):
-        print("Step: running diamond pipeline")
+        print("Step: short reads matching")
         sra_table = {}
         sra_num_list = []
         result = subprocess.getoutput(f'find {self.SRA_path}/SRR*')
@@ -51,7 +51,6 @@ class DiamondDriver:
         for key in sra_table:
             value = sra_table[key]
 
-            print("================ short reads matching ============")
             print(key, value)
 
 
@@ -63,9 +62,9 @@ class DiamondDriver:
 
             # Directory correctly contains two fasta files for annotation
             elif value == 2:
-                file_one = f"/agroseek/www/wp-includes/task_scheduler/{self.SRA_path}/{key}/{key}_1.fastq"
-                file_two = f"/agroseek/www/wp-includes/task_scheduler/{self.SRA_path}/{key}/{key}_2.fastq"
-                output_dir = f"/agroseek/www/wp-includes/task_scheduler/{self.proj_path}/shortreads_output"
+                file_one = f"../{self.SRA_path}/{key}/{key}_1.fastq"
+                file_two = f"../{self.SRA_path}/{key}/{key}_2.fastq"
+                output_dir = f"../{self.proj_path}/shortreads_output"
                 subprocess.run(f"mkdir -p {self.proj_path}/shortreads_output", shell=True)
 
                 # call diamond pipeline to generate normalized annotations
@@ -77,23 +76,7 @@ class DiamondDriver:
                 os.chdir(f'{self.pipeline_path}')
                 subprocess.run(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card", shell=True)
                 print(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card")
-                os.chdir('/agroseek/www/wp-includes/task_scheduler/')
-        # write to outcome.json
-        # (TODO) update this together with the status page
-        # with open(f"{self.proj_path}/outcome.json", "r+") as outcome_file:
-        #     data = json.load(outcome_file)
-        #     # case 1: no errors
-        #     if error_count == 0:
-        #         data['shortreads_outcome'] = 'Success'
-        #     # case 2: some errors, some successes
-        #     elif error_count < len(sra_table):
-        #         data['shortreads_outcome'] = 'Success*'
-        #     # case 3: all errors
-        #     else:
-        #         data['shortreads_outcome'] = 'Failure'
-        #     outcome_file.seek(0)
-        #     json.dump(data, outcome_file, indent=4)
-        #     outcome_file.truncate()
+                os.chdir('../')
 
 
     def error_log(self, sra_value, error_message):
