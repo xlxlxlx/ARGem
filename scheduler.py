@@ -451,17 +451,9 @@ class AnalyzeIt(luigi.Task):
 
         # call script
         subprocess.run(
-            f'python3 {path_to_analysis}/co_occurrence_to_json.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.json 3',            
+            f'python3 {path_to_analysis}/co_occurrence_to_json.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3',            
             shell=True)
 
-        # local visualization page without relying on WP
-        subprocess.run(
-            f'cp {path_to_analysis}/demo.html {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence_network.html',            
-            shell=True)
-            
-        subprocess.run(
-            f'cp {path_to_analysis}/cytoscape-edgehandles.js {userprojs_path}/project_{self.proj_ID}_{ts}/cytoscape-edgehandles.js',            
-            shell=True)
             
         # change the result once the analysis script is resolved
         # write to outcome.json
