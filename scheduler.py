@@ -21,8 +21,8 @@ userprojs_path = "userprojects"
 ts = calendar.timegm(time.gmtime())
 
 # paths to json files used for projects queue / completed projects -- used by status page
-proj_q_path = "../../wp-content/themes/twentyseventeen/projects_queue.json"
-comp_projs_path = "../../wp-content/themes/twentyseventeen/completed_projects.json"
+proj_q_path = "projects_queue.json"
+comp_projs_path = "completed_projects.json"
 
 #connect to db
 import db_config as config
@@ -271,7 +271,7 @@ class ShortReadsMatching(luigi.Task):
                 subprocess.run(f'python3 {path_to_readmatching}/diamond_driver.py {userprojs_path}/project_{self.proj_ID}_{ts}', shell=True)
                 print("found_annotated_file: " + str(len(glob.glob(f'{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/*.clean.card.matches.quant.normalization'))))
                 if len(glob.glob(f'{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/*.clean.card.matches.quant.normalization')) > 0:
-                    subprocess.run(f'python3 /agroseek/www/wp-includes/task_scheduler/normalization2combined.py /agroseek/www/wp-includes/task_scheduler/{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/', shell=True)
+                    subprocess.run(f'python3 normalization2combined.py {userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/', shell=True)
         with self.output().open('w') as fout:
             fout.write("Short reads matching complete.\n")
 
