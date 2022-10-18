@@ -35,6 +35,9 @@ for fn in os.listdir(filepath):
 
 # if df_project.empty():
 #  exit("This project contains no annotations")
+df_project_16S = df_project_16S.fillna(0)
+df_project_TPM = df_project_TPM.fillna(0)
+df_project_FPKM = df_project_FPKM.fillna(0)
 df_project_16S.insert(0, 'Label','default')
 df_project_TPM.insert(0, 'Label','default')
 df_project_FPKM.insert(0, 'Label','default')
