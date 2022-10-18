@@ -73,10 +73,10 @@ class DiamondDriver:
                 fileOutput = f"{output_dir}/{key}.shortreads.csv"
                 fileOutputFinal = f"{output_dir}/{key}.shortreads.csv.clean.card.matches.quant.normalization"
                 
-                os.chdir(f'{self.pipeline_path}')
+                #os.chdir(f'{self.pipeline_path}')
                 subprocess.run(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card", shell=True)
                 print(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card")
-                os.chdir('../')
+                #os.chdir('../')
 
 
     def error_log(self, sra_value, error_message):
