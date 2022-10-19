@@ -38,7 +38,7 @@ class SequenceRetriever:
         self.proj_path = proj_path
 
         self.dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SRA-Numbers') # log file path
-        self.sra_toolkit_path = '~/../kevinliu/sra_toolkit/sratoolkit.2.11.0-centos_linux64/bin' # SRA Toolkit path
+        self.sra_toolkit_path = '' # SRA Toolkit path
 
         self.output_dir = f"{proj_path}/raw_sequence_data" # sequence data output directory name
         self.errorLogFilename = "error-log.tsv"
