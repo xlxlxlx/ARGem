@@ -42,11 +42,11 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 # Reference database
  - CARD: https://card.mcmaster.ca (version 3.1.0)
  - MobileOG: https://github.com/clb21565/mobileOG-db (version 01/22/2022)
- - MetaCompare: doi.org/10.1093/femsec/fiy079
+ - MetaCompare: doi.org/10.1093/femsec/fiy079 (version 11/06/2018)
  - Parnanen et al. MGE Database: https://doi.org/10.1038/s41467-018-06393-w (version 08/16/2021)
 
 The reference databases can be updated by the user to the current version.
 
 # Acknowledge
 The short read matching annotation tool is contributed by Suraj Gupta.   
-CARD_classification_id.csv is obtained from [CARD (Comprehensive Antibiotic Resistance Database)](https://card.mcmaster.ca/) and can be updated by the user to the current version.
+CARD_classification_id.csv for co-occurrence network analysis is obtained from [CARD (Comprehensive Antibiotic Resistance Database)](https://card.mcmaster.ca/) and can be updated by the user to the current version.
