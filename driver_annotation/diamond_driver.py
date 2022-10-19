@@ -19,8 +19,8 @@ class DiamondDriver:
         self.proj_path = proj_path
 
         # paths to important stuff
-        self.diamond_path = "../../../tools/"
-        self.blastn_path = "../../../tools/ncbi-blast-2.9.0+/bin/"
+        self.diamond_path = ""
+        self.blastn_path = ""
         self.card_dmnd_path = "driver_annotation/databases/card-3.1.2.dmnd"
         self.larsson_path = "driver_annotation/databases/larsson.fasta"
         self.metacompare_dmnd_path = "driver_annotation/databases/metacompare.dmnd"
