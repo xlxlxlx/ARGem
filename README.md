@@ -47,6 +47,14 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 The reference databases can be updated by the user to the current version.
 
+# Paths to prequisite tools
+
+If the paths to the tools (SRA Toolkit, BLAST, and DIAMOND) need to be changed, change the corresponding variables in:
+ - driver_retrieval/sra_retriever.py
+ - driver_annotation/blast_driver.py
+ - driver_annotation/diamond_driver.py
+ - driver_annotation/annotation_driver.py
+
 # Acknowledge
 The short read matching annotation tool is contributed by Suraj Gupta.   
 CARD_classification_id.csv for co-occurrence network analysis is obtained from [CARD (Comprehensive Antibiotic Resistance Database)](https://card.mcmaster.ca/) and can be updated by the user to the current version.
