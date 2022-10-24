@@ -36,6 +36,13 @@ if __name__=="__main__":
         mge_line = str(df.iloc[i]['MGE'])
         count = int(df.iloc[i]['count'])
         
+        mge_label = ""
+        #TODO specify types of MGE database
+        if "|" in mge_line:
+            mge_label = mge_line.split("|")[4].split("_")[0]
+        elif "_" in mge_line:
+            mge_label = mge_line.split("_")[1]
+ 
         if count > threshold:   
            if arg_line not in list_of_ARG.keys():
                 list_of_ARG[arg_line] = len(nodes) + 1
@@ -52,7 +59,7 @@ if __name__=="__main__":
            if mge_line not in list_of_MGE.keys():
                list_of_MGE[mge_line] = len(nodes) + 1
                # add to node
-               temp = "{\"data\": {\"id\": " + str(list_of_MGE[mge_line]) + ", \"idInt\": " + str(int(list_of_MGE[mge_line])) + ", \"name\": \"" + mge_line + "\", \"query\": false, \"gene\": true, \"label\": \"" +  mge_line.split("|")[4].split("_")[0] + "\", \"type\": \"MGE\"}}"
+               temp = "{\"data\": {\"id\": " + str(list_of_MGE[mge_line]) + ", \"idInt\": " + str(int(list_of_MGE[mge_line])) + ", \"name\": \"" + mge_line + "\", \"query\": false, \"gene\": true, \"label\": \"" +  mge_label + "\", \"type\": \"MGE\"}}"
                      
                nodes.append(temp)
              
