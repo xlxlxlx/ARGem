@@ -451,7 +451,7 @@ class AnalyzeIt(luigi.Task):
 
         # call script
         subprocess.run(
-            f'python3 {path_to_analysis}/co_occurrence_to_json.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3',            
+            f'python3 {path_to_analysis}/co_occurrence_to_html.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3',            
             shell=True)
 
             
