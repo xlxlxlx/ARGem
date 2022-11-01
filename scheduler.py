@@ -78,8 +78,8 @@ class PreCheck(luigi.Task):
     def run(self):
     
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
     
@@ -87,10 +87,10 @@ class PreCheck(luigi.Task):
             exit()
     
         
-        sql = "SELECT name FROM `project_prime` WHERE project_id =" + f"'{self.proj_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT name FROM `project_prime` WHERE project_id = %s"
+        cursor.execute(sql, (self.proj_ID))
         names = cursor.fetchall()
-        #print(names)
+                     
         proj_name = names[0][0]
         print('====== project name: ' + proj_name + '=======')
 
@@ -184,22 +184,22 @@ class RetrieveSRA(luigi.Task):
     
     def run(self):
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
     
         if len(rows) == 0:
             exit()
 
-        sql = "UPDATE `project_tasks` SET `status` = 'SRA-RETRIEVAL' WHERE task_id = " + f"'{self.task_ID}'"
-        #print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `status` = 'SRA-RETRIEVAL' WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
+                           
         connection.commit()
 
-        sql = "UPDATE `project_tasks` SET `Output_File_ID` = " + f"'/agroseek/www/wp-includes/task_scheduler/{userprojs_path}/project_{self.proj_ID}_{ts}/'" + "WHERE task_id = " + f"'{self.task_ID}'"
-        #print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `Output_File_ID` = %s WHERE task_id = %s"
+        cursor.execute(sql, (f'/agroseek/www/wp-includes/task_scheduler/{userprojs_path}/project_{self.proj_ID}_{ts}/', self.task_ID))
+                           
         connection.commit()
 
 
@@ -216,6 +216,9 @@ class RetrieveSRA(luigi.Task):
 
         with self.output().open('w') as fout:
             fout.write("SRA retrieval complete.\n")
+        
+        # Remove tmp files
+        subprocess.run(f"rm -rf {path_to_sraretrieval}/../fasterq.tmp.*", shell=True)
 
 
 class ShortReadsMatching(luigi.Task):
@@ -237,17 +240,17 @@ class ShortReadsMatching(luigi.Task):
 
     def run(self):
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
 
         if len(rows) == 0:
             exit()
 
-        sql = "UPDATE `project_tasks` SET `status` = 'SHORT-READS-MATCHING' WHERE task_id = " + f"'{self.task_ID}'"
-        # print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `status` = 'SHORT-READS-MATCHING' WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
+                           
         connection.commit()
 
 
@@ -296,17 +299,17 @@ class AssembleIt(luigi.Task):
 
     def run(self):
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
     
         if len(rows) == 0:
             exit()
 
-        sql = "UPDATE `project_tasks` SET `status` = 'ASSEMBLY' WHERE task_id = " + f"'{self.task_ID}'"
-        #print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `status` = 'ASSEMBLY' WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
+                           
         connection.commit()
 
         # update projects queue
@@ -352,17 +355,17 @@ class AnnotateIt(luigi.Task):
     
     def run(self): 
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
     
         if len(rows) == 0:
             exit()
 
-        sql = "UPDATE `project_tasks` SET `status` = 'ANNOTATION' WHERE task_id = " + f"'{self.task_ID}'"
-        #print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `status` = 'ANNOTATION' WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
+                           
         connection.commit()        
                
 
@@ -424,17 +427,17 @@ class AnalyzeIt(luigi.Task):
 
     def run(self):
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
     
         if len(rows) == 0:
             exit()
 
-        sql = "UPDATE `project_tasks` SET `status` = 'ANALYSIS' WHERE task_id = " + f"'{self.task_ID}'"
-        #print(sql)
-        cursor.execute(sql)
+        sql = "UPDATE `project_tasks` SET `status` = 'ANALYSIS' WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
+                           
         connection.commit()        
         
 
@@ -491,8 +494,8 @@ class Runner(luigi.Task):
     def run(self):
 
         # canceled task checker
-        sql = "SELECT * FROM `project_tasks` WHERE task_id =" + f"'{self.task_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT * FROM `project_tasks` WHERE task_id = %s"
+        cursor.execute(sql, (self.task_ID))
         rows = cursor.fetchall()
         print(rows)
 
@@ -500,8 +503,8 @@ class Runner(luigi.Task):
             exit()
 
 
-        sql = "SELECT name FROM `project_prime` WHERE project_id =" + f"'{self.proj_ID}'"
-        cursor.execute(sql)
+        sql = "SELECT name FROM `project_prime` WHERE project_id = %s"
+        cursor.execute(sql, (self.proj_ID))
         names = cursor.fetchall()
         #print(names)
         proj_name = names[0][0]
@@ -534,5 +537,3 @@ class Runner(luigi.Task):
 
         with self.output().open('w') as fout:
             fout.write("pipeline complete.\n")
-
-
