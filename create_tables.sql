@@ -37,8 +37,8 @@ CREATE TABLE `project_tasks` (
 );
 
 CREATE TABLE `SRA_record` (
-  `SRA` varchar(50) NOT NULL,
-  `Status` int(11) NOT NULL
+  `SRA` varchar(50) PRIMARY KEY,
+  `Status` int(11) DEFAULT 0
 );
 
 CREATE TABLE `users` (
