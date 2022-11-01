@@ -38,10 +38,12 @@ if __name__=="__main__":
         
         mge_label = ""
         #TODO specify types of MGE database
-        if "|" in mge_line:
+        if len(mge_line.split("|")) > 3:
             mge_label = mge_line.split("|")[4].split("_")[0]
         elif "_" in mge_line:
             mge_label = mge_line.split("_")[1]
+        else:
+            mge_label = mge_line
  
         if count > threshold:   
            if arg_line not in list_of_ARG.keys():
@@ -396,11 +398,5 @@ style: [{
 </html>
 
 
-
-
 """)
-
-
-
-
 
