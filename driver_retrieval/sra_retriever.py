@@ -1,7 +1,16 @@
+                       
+                                                                         
+                                                           
+
+                                                    
+                                
+                               
 
 '''
 File Structure (temp)
     - driver_retrieval/
+         
+                                    
         - sra_retriever.py
         - SRA-Numbers
             - sra-log.tsv
@@ -24,6 +33,8 @@ import datetime
 import subprocess
 import pandas as pd
 import json
+import db_config as config
+import os, sys, pymysql, subprocess
 
 class SequenceRetriever:
     '''
@@ -38,9 +49,9 @@ class SequenceRetriever:
         self.proj_path = proj_path
 
         self.dir_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SRA-Numbers') # log file path
-        self.sra_toolkit_path = '' # SRA Toolkit path
+        self.sra_toolkit_path = "/agroseek/tools/sratoolkit.3.0.0-centos_linux64/bin" # SRA Toolkit path
 
-        self.output_dir = f"{proj_path}/raw_sequence_data" # sequence data output directory name
+        self.sra_dir = "/agroseek/www/wp-includes/task_scheduler/sra_data" # sequence data output directory name
         self.errorLogFilename = "error-log.tsv"
         self.SRALogFilename = "sra-log"
 
@@ -58,8 +69,10 @@ class SequenceRetriever:
 
         :param sra_list: a list of SRA accession numbers to retrieve to raw sequence data of
         '''
+        max_prefetch_size = '70G'
+        
         for sra_num in sra_list:
-
+                                
             curr_time = time.strftime("%Y-%m-%d|%H:%M:%S")
 
             print('\n\n')
@@ -68,18 +81,90 @@ class SequenceRetriever:
                 for line in vdb_dump_output.split('\n'):
                     print(line)
             else: continue
+t
 
-            max_prefetch_size = '70G' # in bytes (or with GB)
-            subprocess.run(f"{self.sra_toolkit_path}/prefetch -p {sra_num} -X {max_prefetch_size}", shell=True)
 
-            # check if the prefetched .sra file exist (if not, then it might have exceeded the max-size requirement)
-            if sra_num not in os.listdir():
-                self.prefetch_oversize_sra.append(sra_num)
+            # The logic below can be simplified
+            
+            sql = "SELECT * FROM `SRA_record` WHERE SRA = %s"
+            cursor.execute(sql, (f"{sra_num}"))
+            rows = cursor.fetchall()
+            print("found SRA: ", rows)
+            
+            ###############
+            # Status:
+            # (not found) -1 
+            # by default 0
+            # success prefetch 1
+            # success fasterq-dump 2
+            ################
+            status = -1
+            if len(rows) != 0:
+                row = rows[0]
+                status = row[1]
+                
+            # not found in record
+            if status == -1:
+                # initialized
+                sql = "INSERT INTO `SRA_record` (`SRA`, `Status`) VALUES (%s, %s)"
+                cursor.execute(sql, (f"{sra_num}", 0))
+                connection.commit()
+                
+                # prefetch
+                subprocess.run(f"{self.sra_toolkit_path}/prefetch -p {sra_num} -X {max_prefetch_size} -O {self.sra_dir}", shell=True)
+                
+                if os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}.sra") and not os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}.sra.lock"):
+                    sql = "UPDATE `SRA_record` SET `status` = %s WHERE SRA = %s"
+                    cursor.execute(sql, (1, f"{sra_num}"))
+                    connection.commit()
+                
+                # fast-dump
+                subprocess.run(f"{self.sra_toolkit_path}/fasterq-dump --split-3 -O {self.sra_dir}/{sra_num} {self.sra_dir}/{sra_num}/{sra_num}.sra -p", shell=True)
+                
+                if os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_1.fastq") and os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_2.fastq"):
+                    sql = "UPDATE `SRA_record` SET `status` = %s WHERE SRA = %s"
+                    cursor.execute(sql, (2, f"{sra_num}"))
+                    connection.commit()
+            
+            # found in record, completed entire process
+            elif status == 2:
                 continue
-
-            print(f"Converting {sra_num}.sra to {sra_num}.fastq...")
-            subprocess.run(f"{self.sra_toolkit_path}/fasterq-dump --split-3 -O {self.output_dir}/{sra_num} \
-                ./{sra_num}/{sra_num}.sra -p", shell=True)
+                
+            # found in record, completed prefetch
+            elif status == 1:    
+                # clean up old dump
+                # the file is only generated at the end of the process
+                #subprocess.run(f"rm -f {self.sra_dir}/{sra_num}/{sra_num}_1.fastq", shell=True)
+                #subprocess.run(f"rm -f {self.sra_dir}/{sra_num}/{sra_num}_2.fastq", shell=True)
+                
+                # fast-dump
+                subprocess.run(f"{self.sra_toolkit_path}/fasterq-dump --split-3 -O {self.sra_dir}/{sra_num} {self.sra_dir}/{sra_num}/{sra_num}.sra -p", shell=True)
+                
+                if os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_1.fastq") and os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_2.fastq"):
+                    sql = "UPDATE `SRA_record` SET `status` = %s WHERE SRA = %s"
+                    cursor.execute(sql, (2, f"{sra_num}"))
+                    connection.commit()
+                    
+            # something weird happened in the middle
+            else:
+                # empty the folder
+                subprocess.run(f"rm -rf {self.sra_dir}/{sra_num}", shell=True)
+                
+                # prefetch
+                subprocess.run(f"{self.sra_toolkit_path}/prefetch -p {sra_num} -X {max_prefetch_size} -O {self.sra_dir}", shell=True)
+                
+                if os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}.sra") and not os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}.sra.lock"):
+                    sql = "UPDATE `SRA_record` SET `status` = %s WHERE SRA = %s"
+                    cursor.execute(sql, (1, f"{sra_num}"))
+                    connection.commit()
+                
+                # fast-dump
+                subprocess.run(f"{self.sra_toolkit_path}/fasterq-dump --split-3 -O {self.sra_dir}/{sra_num} {self.sra_dir}/{sra_num}/{sra_num}.sra -p", shell=True)
+                
+                if os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_1.fastq") and os.path.exists(f"{self.sra_dir}/{sra_num}/{sra_num}_2.fastq"):
+                    sql = "UPDATE `SRA_record` SET `status` = %s WHERE SRA = %s"
+                    cursor.execute(sql, (2, f"{sra_num}"))
+                    connection.commit()
 
 
     def verify_sra_format(self, sra_input: list) -> list:
@@ -101,7 +186,19 @@ class SequenceRetriever:
         # past_data = [sra[0] for sra in mycursor]
 
         for sra_num in sra_input:
-            sra_num = sra_num.strip().replace('\n', '')
+            if not sra_num:
+              continue
+            
+            # remove the tab, newlines and spaces 
+            sra_num = re.sub(r"[\n\t\s]*", "", sra_num)
+            sra_num = sra_num.strip()
+            
+            sra_num_digits = re.sub(r'[^0-9]', '', sra_num)
+            sra_num = sra_num[:3] + sra_num_digits
+            
+            #if not sra_num_digits:
+            #  continue
+                       
 
             # if re.match("^(SRR|ERR)[0-9]+$", sra_num.upper()) and sra_num not in past_data: # i.e. SRR1568808
             if re.match("^(SRR|ERR)[0-9]+$", sra_num.upper()): # i.e. SRR1568808
@@ -119,7 +216,7 @@ class SequenceRetriever:
                 print(f"SRA number {sra_num} is incorrect.")
 
                 # invalide SRA log
-                self.log_error(sra_num, errorMess, "404")
+                self.log_error(sra_num, errorMess, "404", "")
 
         return correct_data
 
@@ -137,7 +234,7 @@ class SequenceRetriever:
         validation = True
 
         for sra_num in self.progress_bar(sra_input_list, prefix="Validating SRA Data: ", bar_length=50):
-            result = subprocess.getoutput(f'{self.sra_toolkit_path}/vdb-validate {sra_num}')
+            result = subprocess.getoutput(f'{self.sra_toolkit_path}/vdb-validate {self.sra_dir}/{sra_num}')
             result = result.split('\n')
 
             for line in result:
@@ -283,39 +380,39 @@ class SequenceRetriever:
         '''
         errors = []
 
-        for sra_num in self.progress_bar(sra_data, prefix="Cleaning Up Redundant Files: ", bar_length=50):
-            sra_num = sra_num.strip().replace('\n', '')
+        # for sra_num in self.progress_bar(sra_data, prefix="Cleaning Up Redundant Files: ", bar_length=50):
+            # sra_num = sra_num.strip().replace('\n', '')
 
-            # Failed SRA prefetch does not create a empty file
-            if sra_num in self.prefetch_access_failed_sra or sra_num in self.prefetch_access_denied_sra or sra_num in self.prefetch_oversize_sra:
-                continue
+            # # Failed SRA prefetch does not create a empty file
+            # if sra_num in self.prefetch_access_failed_sra or sra_num in self.prefetch_access_denied_sra or sra_num in self.prefetch_oversize_sra:
+                # continue
 
-            file_removal = subprocess.getoutput(f'rm ./{sra_num}/{sra_num}.sra')
-            dir_removal = subprocess.getoutput(f'rmdir ./{sra_num}')
+            # file_removal = subprocess.getoutput(f'rm ./{sra_num}/{sra_num}.sra')
+            # dir_removal = subprocess.getoutput(f'rmdir ./{sra_num}')
 
-            if len(file_removal) > 0 or len(dir_removal) > 0:
-                errors.append(f"Removal for {sra_num}.sra failed.")
-                error_message = f"{sra_num}.sra and/or the folder containing this file failed to be removed."
-                self.log_error(sra_num, error_message, "-1", task_id) 
+            # if len(file_removal) > 0 or len(dir_removal) > 0:
+                # errors.append(f"Removal for {sra_num}.sra failed.")
+                # error_message = f"{sra_num}.sra and/or the folder containing this file failed to be removed."
+                # self.log_error(sra_num, error_message, "-1", task_id) 
 
 
         if len(self.prefetch_access_denied_sra) > 0:
             for sra_num in self.prefetch_access_denied_sra:
-                empty_folder_removal = subprocess.getoutput(f'rmdir {os.path.dirname(os.path.realpath(__file__))}/{self.output_dir}/{sra_num}')
+                empty_folder_removal = subprocess.getoutput(f'rmdir {self.sra_dir}/{sra_num}')
 
                 error_message = "Incorrect SRA: access denied (403)"
                 self.log_error(sra_num, error_message, "403", task_id)
 
         if len(self.prefetch_access_failed_sra) > 0:
             for sra_num in self.prefetch_access_failed_sra:
-                empty_folder_removal = subprocess.getoutput(f'rmdir {os.path.dirname(os.path.realpath(__file__))}/{self.output_dir}/{sra_num}')
+                empty_folder_removal = subprocess.getoutput(f'rmdir {self.sra_dir}/{sra_num}')
 
                 error_message = "Incorrect SRA: failed to resolve accession (404)"
                 self.log_error(sra_num, error_message, "404", task_id)
 
         if len(self.prefetch_oversize_sra) > 0:
             for sra_num in self.prefetch_oversize_sra:
-                empty_folder_removal = subprocess.getoutput(f'rmdir {os.path.dirname(os.path.realpath(__file__))}/{self.output_dir}/{sra_num}')
+                empty_folder_removal = subprocess.getoutput(f'rmdir {self.sra_dir}/{sra_num}')
 
                 error_message = "SRA exceeds the maximum allowed size (1101)"
                 self.log_error(sra_num, error_message, "1101", task_id)
@@ -336,6 +433,8 @@ class SequenceRetriever:
         '''
 
         count = len(input)
+        if count == 0:
+            return
         def show(curr):
             filled_length = int(bar_length * curr / count)
 
@@ -398,9 +497,10 @@ class SRARetriever:
     '''
     Class responsible for retrieving the SRA accession numbers from the user-uploaded metadata spreadsheets.
     '''
-    def __init__(self):
+    def __init__(self, proj_path):
         self.log_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'SRA-Numbers')
         self.log_file_name = "sra-log"
+        self.proj_path = proj_path
 
     def retrieve_SRA(self, sys_argv):
         '''
@@ -411,7 +511,6 @@ class SRARetriever:
             Argument Two: Project ID
             Argument Three: User ID
 
-        Execution reference: wp-content/themes/twentyseventeen/uploadmeta_submit.php
         '''
         if len(sys_argv) > 1:
             input_file = sys.argv[1]
@@ -434,82 +533,40 @@ class SRARetriever:
         df_metadata = df_metadata.apply(pd.to_numeric, errors='ignore')
 
         SRA_list = df_metadata["NCBI_SRA_number"].to_string(index=False).strip().split('\n')
+        #SRA_list = [x for x in SRA_list if x.startswith("SRR")]
         if SRA_list[0].startswith("SRR") != 1:
             SRA_list = SRA_list[1:]
-
-        with open(os.path.join(self.log_file_path, self.log_file_name), "w", encoding="utf-8") as file_ptr:
+        with open(os.path.join(self.proj_path, 'SRA_list'), "w", encoding="utf-8") as sra_list_file:
             for SRA in SRA_list:
-                file_ptr.write(f"{SRA}\t{project_id}\t{user_id}\n")
+                sra_list_file.write(f"{SRA},")
+
+        with open(os.path.join(self.log_file_path, self.log_file_name), "w", encoding="utf-8") as sra_list_file:
+            for SRA in SRA_list:
+                sra_list_file.write(f"{SRA}\t{project_id}\t{user_id}\n")
 
 
 # Driver Code
 if __name__ == "__main__":
-    SRARetr = SRARetriever()
+                          
+
+    db = config.DATABASE
+    try:
+        connection = pymysql.connect(host = db['host'],
+        user = db['account'],
+        password = db['pwd'],
+        db = db['db_name'])
+        cursor = connection.cursor()
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    proj_path = sys.argv[2]  # 2nd argument should be project name
+
+
+    SRARetr = SRARetriever(proj_path)
     SRARetr.retrieve_SRA(sys.argv)
 
-    proj_path = sys.argv[2]  # 2nd argument should be project name
     print("====== proj_path:" + proj_path + "=======")
     task_id = sys.argv[4]
     SeqRetr = SequenceRetriever(proj_path)
     SeqRetr.run_retriever(verify_input=True, validate_data=True, task_id=task_id)
-
-
-# If store the retrieved SRA accession numbers, uncomment the following block
-# class SRARetriever:
-#     '''
-#     Class responsible for the retrieval and storage of SRA accession numbers from the MySQL database.
-#     '''
-
-#     def __init__(self):
-#         self.query = 'select * from sample_metadata where ATT_ID = 234;'
-#         self.SRAInfo = {}
-
-
-#     def retrieve_sra_num(self):
-#         '''
-#         Retrieves SRA accession numbers from the MySQL database. All data present in the MySQL SRA table
-#         will be stored in the self.SRAInfo hash table.
-
-#         :return: a list containing the SRA accession numbers retrieved
-#         :rtype: list
-#         '''
-
-#         database = pymysql.connect(
-#             host='localhost',
-#             user='root',
-#             passwd='password',
-#             database='sra_test'
-#         )
-
-#         mycursor = database.cursor()
-#         try:
-#             mycursor.execute(self.query)
-
-#         except pymysql.Error as e:
-#             print("Error reading data from MySQL table: ", e)
-
-#         for sra in mycursor:
-#             try:
-#                 self.SRAInfo[sra[4]] = [sra[0], sra[1], sra[2], sra[3]]
-#             except Exception as error:
-#                 print(f"SRA info hash table write error for {sra[4]}: {error}")
-
-
-#     def store_sra_num(self, log_file_name: str):
-#         '''
-#         Stores the retrieved SRA accession numbers in the designated log file
-
-#         :param log_file_name: name for the txt file storing the SRA accession numbers
-#         :param sra_list: a list of SRA accession numbers
-#         '''
-#         seqRetr = SequenceRetriever(self)
-#         file_path = seqRetr.dir_path
-        
-#         with open(os.path.join(file_path, log_file_name), "w", encoding="utf-8") as file_ptr:
-#             for sra, sra_info in self.SRAInfo.items():
-#                 file_ptr.write(f"{sra}\n")
-#             print(f"{len(self.SRAInfo.items())} SRA accession number(s) has been successfully written into the log file.")
-
-    
-
-
+                                                                                                            
