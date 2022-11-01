@@ -18,62 +18,41 @@ class DiamondDriver:
         self.proj_path = proj_path
 
         self.pipeline_path = "diamond-annotation/"
-        self.SRA_path = f"{proj_path}/raw_sequence_data"
+        self.SRA_path = "sra_data"
 
     def run_diamond(self):
         print("Step: short reads matching")
-        sra_table = {}
+                      
         sra_num_list = []
-        result = subprocess.getoutput(f'find {self.SRA_path}/SRR*')
-        result = result.split('\n')
-        print(result)
-
-        # Find all SRA accession numbers in the designated directory
-        for sra_folder in result:
-            sra_folder = sra_folder.replace(f'{proj_path}/raw_sequence_data/', '')
-
-            if re.search("SRR[0-9]+$", sra_folder, re.IGNORECASE) != None:
-                sra_num_list.append(sra_folder)
-
-        # Determines if the directories for each SRA number contain the correct number of fasta files
+        
+        
+        with open(os.path.join(self.proj_path, 'SRA_list'), "r", encoding="utf-8") as sra_list_file:
+            lines = sra_list_file.readlines()
+            sra_num_list = lines[0].split(',')[:-1]
         print(sra_num_list)
-        for sra_num in sra_num_list:
-            for sra_folder in result:
-                if re.search(f"{sra_num}_1.fastq", sra_folder) != None:
-                    sra_table[sra_num] = 2
-                    break
-                else:
-                    sra_table[sra_num] = 1
 
         error_count = 0
-        print('sra_table')
-        print(sra_table)
-        for key in sra_table:
-            value = sra_table[key]
-
-            print(key, value)
-
-
+        for key in sra_num_list:
+            key = key.strip()
+            file_one = f"{self.SRA_path}/{key}/{key}_1.fastq"
+            file_two = f"{self.SRA_path}/{key}/{key}_2.fastq"
+            
             # Only 1 or less fasta file is present in the directory -> throws error
-            if value == 1:
-                error_message = "Error: Only one fastq file is available for assembly."
+            if not os.path.exists(file_one) or not os.path.exists(file_two):
+                error_message = "Error: no enought fastq files available for assembly."
                 error_count += 1
                 self.error_log(key, error_message)
 
             # Directory correctly contains two fasta files for annotation
-            elif value == 2:
-                file_one = f"../{self.SRA_path}/{key}/{key}_1.fastq"
-                file_two = f"../{self.SRA_path}/{key}/{key}_2.fastq"
-                output_dir = f"../{self.proj_path}/shortreads_output"
+            else:
+                output_dir = f"/agroseek/www/wp-includes/task_scheduler/{self.proj_path}/shortreads_output"
                 subprocess.run(f"mkdir -p {self.proj_path}/shortreads_output", shell=True)
 
                 # call diamond pipeline to generate normalized annotations
 
                 # where to look for the results...
                 fileOutput = f"{output_dir}/{key}.shortreads.csv"
-                fileOutputFinal = f"{output_dir}/{key}.shortreads.csv.clean.card.matches.quant.normalization"
-                
-                #os.chdir(f'{self.pipeline_path}')
+                fileOutputFinal = f"{output_dir}/{key}.shortreads.csv.clean.card.matches.quant.normalization"#os.chdir(f'{self.pipeline_path}')
                 subprocess.run(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card", shell=True)
                 print(f"python3 {self.pipeline_path}/diamond_pipeline.py --forward_pe_file {file_one} --reverse_pe_file {file_two} --output_file {output_dir}/{key}.shortreads.csv --database card")
                 #os.chdir('../')
@@ -100,5 +79,4 @@ if __name__ =="__main__":
     diamondDvr.run_diamond()
 
     print(f"[Total Time Spent: {round((time.time() - ini_time), 2)} seconds]")
-
 
