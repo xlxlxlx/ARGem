@@ -58,9 +58,9 @@ This will generate a `db_name.dmnd` file. The generated `.dmnd` files need to be
 
 In addition, two databases can be added to the shortread matching step.
  - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
- - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/?prefix=downloads/greengenes_database/gg_13_5/
+ - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/
 
-The database file can be put under:
+The database files can be put under:
  - driver_readmatching/diamond-annotation/bin/deeparg （for DeepARG database)
  - driver_readmatching/diamond-annotation/bin/gg13 （for GreenGenes database)
 
