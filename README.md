@@ -47,6 +47,26 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 The reference databases can be updated by the user to the current version.
 
+Once obtained, the reference database can be processed by DIAMON using a command like below:
+<code>diamond makedb --in db_name.fasta -d db_name </code>
+
+This will generate a `db_name.dmnd` file. The generated `.dmnd` files need to be put under:
+ - driver_annotation/databases
+ - driver_readmatching/diamond-annotation/bin/card （for CARD databae)
+
+---
+
+In addition, two databases can be added to the shortread matching step.
+ - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
+ - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/?prefix=downloads/greengenes_database/gg_13_5/
+
+The database file can be put under:
+ - driver_readmatching/diamond-annotation/bin/deeparg （for DeepARG database)
+ - driver_readmatching/diamond-annotation/bin/gg13 （for GreenGenes database)
+
+The configurations of the short read matching pipeline can be changed according to the README in driver_readmatching/diamond-annotation/
+
+
 # Paths to prequisite tools
 
 If the paths to the tools (SRA Toolkit, BLAST, and DIAMOND) need to be changed, change the corresponding variables in:
