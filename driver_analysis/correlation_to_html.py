@@ -3,84 +3,71 @@ import json
 import sys
 import sqldf
 import pandas as pd
-#Run as python data_process_to_json <CARD> <occurrence> <output_json file name> <treshhold>
+#Run as python data_process_to_json  <correlation> <output_html file name> <card_database>
 if __name__=="__main__":
-    CARD = sys.argv[1]
-    occurrence = sys.argv[2]
+    correlation = sys.argv[1]
     #spearman = sys.argv[3]
-    output = sys.argv[3]
-    threshold = 0
-    if len(sys.argv) > 4:
-        threshold = int(sys.argv[4])
-    
-    # Check if the combination file is exception
-    #where card_all is non-empty, but mge_all is empty
-    check_file = open(occurrence, 'r')
-    first_line = check_file.readline()
-    if ("Id" in first_line):
-        #Create emtpy html file
-        with open(output, 'w') as f: 
-            f.write(" ")
-        exit()
-    check_file.close()
-
-
-
- 
-    with open(CARD, mode='r') as CARD_file:
-        reader = csv.reader(CARD_file)
-        CARD_type_dict = {}
-        CARD_id_dict   = {}
-
-        for rows in reader:
-            #print(rows)
-            CARD_type_dict[rows[0]] = rows[1]
-            CARD_id_dict[rows[0]]   = rows[2]
-    list_of_ARG = {}
-    list_of_MGE = {}
-    nodes = []
-    edges = []
-    iter_csv = pd.read_csv(occurrence, iterator=True, sep='\t', header=0)
-    df = pd.concat([occurrence[occurrence['count'].astype(int) > threshold] for occurrence in iter_csv])
+    output = sys.argv[2]
     #print("filtered")
     #print(df)
-    networkcount= 0
-    for i in range(0,df.shape[0]):
-        arg_line = str(df.iloc[i]['ARG'])
-        mge_line = str(df.iloc[i]['MGE'])
-        count = int(df.iloc[i]['count'])
-        
-        mge_label = ""
-        #TODO specify types of MGE database
-        if len(mge_line.split("|")) > 3:
-            mge_label = mge_line.split("|")[4].split("_")[0]
-        elif "_" in mge_line:
-            mge_label = mge_line.split("_")[1]
-        else:
-            mge_label = mge_line
- 
-        if count > threshold:   
-           if arg_line not in list_of_ARG.keys():
-                list_of_ARG[arg_line] = len(nodes) + 1
-                # add to node
-                if arg_line.split('|')[3] not in CARD_type_dict.keys(): 
-                    card_type_line = "N/A"
-                else:
-                    card_type_line = CARD_type_dict[arg_line.split("|")[3]] 
-                temp = "{\"data\":{\"id\": " + str( list_of_ARG[arg_line]) + ", \"idInt\" : " + str(int(list_of_ARG[arg_line])) +  ", \"name\": \"" + arg_line + "\", \"label\": \"" + arg_line.split("|")[3] +  "\", \"query\": false, \"gene\": true, \"type\": \"" + card_type_line+ "\"}}"
-                      #"samples": sample_dict[gene]
-    
-                  
-                nodes.append(temp)
-           if mge_line not in list_of_MGE.keys():
-               list_of_MGE[mge_line] = len(nodes) + 1
-               # add to node
-               temp = "{\"data\": {\"id\": " + str(list_of_MGE[mge_line]) + ", \"idInt\": " + str(int(list_of_MGE[mge_line])) + ", \"name\": \"" + mge_line + "\", \"query\": false, \"gene\": true, \"label\": \"" +  mge_label + "\", \"type\": \"MGE\"}}"
-                     
-               nodes.append(temp)
-             
-           # Create edge between two 
-           temp_edge  = "{\"data\":{\"source\": " + str(int(list_of_ARG[arg_line])) + ", \"target\" : " + str(int(list_of_MGE[mge_line])) + ", \"weight\": " + str(count) + ", \"group\": \"coexp\", \"networkId\": " + str(networkcount) + ", \"networkGroupID\":  18, \"intn\": true, \"rIntnId\": 2, \"id\": \"e"  + str(len(edges)) + "\"}, \"position\":  {}, \"group\": \"edges\", \"removed\": false, \"selected\": false, \"selectable\": true, \"locked\": false, \"grabbed\": false, \"grabbable\": true, \"classes\": \"\"}"
+    nodes = []
+    edges = []
+    node_names = []
+    networkcount = 0
+    card_database = sys.argv[3]
+    card_type = {}
+    with open(card_database, mode='r') as card_file:
+       for line in card_file.readlines():
+           if len(line.split(',')) < 2:
+               continue
+           values = line.split(',')
+           card_type[values[0]] = values[1]
+    #print(card_type)
+
+
+
+    with open(correlation, mode='r') as spearman_file:
+        #header = spearman_file.readline().split("\n")[0].split(',')
+        header = ""
+        spearman_reader = csv.reader(spearman_file)
+        #print(header)
+        for line in spearman_reader:
+            if header == "":
+                header = line
+                continue
+
+            values = line
+            target_gene = values[0]
+            for i in range(1, len(values)):
+                if ('{' in values[i] or values[i] == "" or values[i] == "\n"):
+                    continue
+                start_gene = header[i]
+                if (start_gene == target_gene):
+                    continue
+                if (start_gene not in node_names):
+                    #check if type exists
+                    type_gene = ""
+                    if start_gene in card_type.keys():
+                        type_gene = card_type[start_gene]
+                    else:
+                        type_gene = "N/A"
+                    temp = "{\"data\":{\"id\": \"" + str(int(len(node_names))) + "\", \"idInt\" : " + str(int(len(node_names))) +  ", \"name\": \"" + start_gene + "\", \"label\": \"" + start_gene +  "\", \"query\": false, \"gene\": true, \"type\": \"" + type_gene + "\"}}"
+                    node_names.append(start_gene)
+                    nodes.append(temp)
+                if (target_gene not in node_names):
+                    type_gene = ""
+                    if target_gene in card_type.keys():
+                        type_gene = card_type[target_gene]
+                    else:
+                        type_gene = "N/A"
+                    temp = "{\"data\":{\"id\": \"" + str(int(len(node_names))) + "\", \"idInt\" : " + str(int(len(node_names))) +  ", \"name\": \"" + target_gene + "\", \"label\": \"" + target_gene +  "\", \"query\": false, \"gene\": true, \"type\": \"" + type_gene + "\"}}"
+                    node_names.append(target_gene)
+                    nodes.append(temp)
+                # Remove '\n' at the end of each row
+                values[i] = values[i].split('\n')[0]
+                temp_edge  = "{\"data\":{\"source\": " + str(int(node_names.index(start_gene))) + ", \"target\" : " + str(int(node_names.index(target_gene))) + ", \"weight\": " + str(abs(float(values[i]))) + ", \"label\": " + str(float(values[i])) + ", \"group\": \"coexp\", \"networkId\": " + str(networkcount) + ", \"networkGroupID\":  18, \"intn\": true, \"rIntnId\": 2, \"id\": \"e"  + str(len(edges)) + "\"}, \"position\":  {}, \"group\": \"edges\", \"removed\": false, \"selected\": false, \"selectable\": true, \"locked\": false, \"grabbed\": false, \"grabbable\": true, \"classes\": \"\"}"
+                edges.append(temp_edge)
+                networkcount += 1 
                     #    "removed": False,
                     #    "selected": False,
                     #    "selectable": True,
@@ -89,7 +76,6 @@ if __name__=="__main__":
                     #    "grabbable": True,
                     #    "classes": ""
                     #}
-           edges.append(temp_edge)
 
 
     string_nodes = ",\n".join(nodes)
@@ -103,7 +89,7 @@ if __name__=="__main__":
 <html>
 
 <head>
-    <title>cytoscape co-occurrence demo</title>
+    <title>cytoscape correlation demo</title>
     <script src=\"https://unpkg.com/cytoscape/dist/cytoscape.min.js\"></script>
     <meta name=\"viewport\" content=\"width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1\">
     <script src=\"https://unpkg.com/jquery/dist/jquery.min.js\"></script>
@@ -402,7 +388,7 @@ style: [{
 
  cy.edges().on('click', function(e) {
       var ele = e.target;
-      alert('occurrence: \\n' + ele.data("weight"));
+      alert('correlation: \\n' + ele.data("label"));
  });
 
 
