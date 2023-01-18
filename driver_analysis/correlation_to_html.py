@@ -65,6 +65,9 @@ if __name__=="__main__":
                     nodes.append(temp)
                 # Remove '\n' at the end of each row
                 values[i] = values[i].split('\n')[0]
+                # check duplicates 
+                if start_gene > target_gene:
+                    continue
                 temp_edge  = "{\"data\":{\"source\": " + str(int(node_names.index(start_gene))) + ", \"target\" : " + str(int(node_names.index(target_gene))) + ", \"weight\": " + str(abs(float(values[i]))) + ", \"label\": " + str(float(values[i])) + ", \"group\": \"coexp\", \"networkId\": " + str(networkcount) + ", \"networkGroupID\":  18, \"intn\": true, \"rIntnId\": 2, \"id\": \"e"  + str(len(edges)) + "\"}, \"position\":  {}, \"group\": \"edges\", \"removed\": false, \"selected\": false, \"selectable\": true, \"locked\": false, \"grabbed\": false, \"grabbable\": true, \"classes\": \"\"}"
                 edges.append(temp_edge)
                 networkcount += 1 
@@ -251,112 +254,98 @@ style: [{
 }, {
   "selector": "node[type=\\"aminocoumarin\\"]",
   "style": {
-    "background-color": "#CO413B"
+    "background-color": "#68023F"
     ,'border-color': '#594D5B'
   }
 }, {
   "selector": "node[type=\\"aminoglycoside\\"]",
   "style": {
-    "background-color": "#D77B5F"
+    "background-color": "#008169"
     ,'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"beta-lactam\\"]",
   "style": {
-    "background-color": "#FF9200",
-    'border-color': '#594D5B'
-  }
-}, {
-  "selector": "node[type=\\"beta-lactam\\"]",
-  "style": {
-    "background-color": "#FF9200",
+    "background-color": "#EF0096",
     'border-color': '#594D5B'
   }
 }, {
   "selector": "node[type=\\"elfamycin\\"]",
   "style": {
-    "background-color": "#FFCD73",'border-color': '#594D5B'
+    "background-color": "00DCB5",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"fosfomycin\\"]",
   "style": {
-    "background-color": "#F7E5BF",'border-color': '#594D5B'
+    "background-color": "#FFCFE2",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"glycopeptide\\"]",
   "style": {
-    "background-color": "#C87505",'border-color': '#594D5B'
+    "background-color": "#003C86",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"mls\\"]",
   "style": {
-    "background-color": "#C14C32",'border-color': '#594D5B'
+    "background-color": "#9400E6",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"multidrug\\"]",
   "style": {
-    "background-color": "#80003A",'border-color': '#594D5B'
-
-  }
-}, {
-  "selector": "node[type=\\"other\\"]",
-  "style": {
-    "background-color": "#506432",'border-color': '#594D5B'
+    "background-color": "#009FFA",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"peptide\\"]",
   "style": {
-    "background-color": "#B30019",'border-color': '#594D5B'
+    "background-color": "#FF71FD",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"phenicol\\"]",
   "style": {
-    "background-color": "#EC410B",'border-color': '#594D5B'
+    "background-color": "#7CFFFA",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"quinolone\\"]",
   "style": {
-    "background-color": "#FFF7C2",'border-color': '#594D5B'
+    "background-color": "#6A0213",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"rifampin\\"]",
   "style": {
-    "background-color": "#FFB27B",'border-color': '#594D5B'
+    "background-color": "#008607",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"rifamycin\\"]",
   "style": {
-    "background-color": "#BC7576",'border-color': '#594D5B'
+    "background-color": "#F60239",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"sulfonamide\\"]",
   "style": {
-    "background-color": "#696B7E",'border-color': '#594D5B'
+    "background-color": "#00E307",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"tetracycline\\"]",
   "style": {
-    "background-color": "#FFA400",'border-color': '#594D5B'
+    "background-color": "#FFDC3D",'border-color': '#594D5B'
 
   }
 }, {
   "selector": "node[type=\\"MGE\\"]",
   "style" : {
-    "shape": "rectangle"
-    
-      
+    "shape": "rectangle" 
   }
 }   
                 ],
