@@ -407,7 +407,7 @@ class AnnotateIt(luigi.Task):
         #os.system(cp_cmd)
 
 class AnalyzeIt(luigi.Task):
-    '''calls annotation driver'''
+    '''calls analyze driver'''
 
     metadata = luigi.Parameter()
     proj_ID = luigi.Parameter()
@@ -437,7 +437,6 @@ class AnalyzeIt(luigi.Task):
 
         sql = "UPDATE `project_tasks` SET `status` = 'ANALYSIS' WHERE task_id = %s"
         cursor.execute(sql, (self.task_ID))
-                           
         connection.commit()        
         
 
@@ -452,18 +451,26 @@ class AnalyzeIt(luigi.Task):
 
         print("Starting analyzing")
 
-        # co-occurrence
-        print(f'python3 {path_to_analysis}/co_occurrence_to_html.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3')
         subprocess.run(
-            f'python3 {path_to_analysis}/co_occurrence_to_html.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3',            
+            f'python3 {path_to_analysis}/housekeeping_CARD_list.py {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations_filtered.tsv  {path_to_analysis}/housekeeping_CARD_list.csv coocurrence',            
+            shell=True)
+        # co-occurrence
+        #print(f'python3 {path_to_analysis}/co_occurrence_to_html.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations_filtered.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3')
+        subprocess.run(
+            f'python3 {path_to_analysis}/co_occurrence_to_html.py {path_to_analysis}/CARD_classification_id.csv {userprojs_path}/project_{self.proj_ID}_{ts}/annotations/combinations_filtered.tsv {userprojs_path}/project_{self.proj_ID}_{ts}/co_occurrence.html 3',            
             shell=True)
             
         # correlation
         subprocess.run(
             f'python3 {path_to_analysis}/SAIG_correlation.py {userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/combined.clean.card.matches.quant.normalization.16S.csv {userprojs_path}/project_{self.proj_ID}_{ts}/correlation_result.csv',            
             shell=True)
+            
         subprocess.run(
-            f'python3 {path_to_analysis}/correlation_to_html.py {userprojs_path}/project_{self.proj_ID}_{ts}/correlation_result.csv {userprojs_path}/project_{self.proj_ID}_{ts}/correlation.html {path_to_analysis}/CARD_classification_id.csv',            
+            f'python3 {path_to_analysis}/housekeeping_CARD_list.py {userprojs_path}/project_{self.proj_ID}_{ts}/correlation_result.csv {userprojs_path}/project_{self.proj_ID}_{ts}/correlation_result_filtered.csv {path_to_analysis}/housekeeping_CARD_list.csv correlation',            
+            shell=True)
+            
+        subprocess.run(
+            f'python3 {path_to_analysis}/correlation_to_html.py {userprojs_path}/project_{self.proj_ID}_{ts}/correlation_result_filtered.csv {userprojs_path}/project_{self.proj_ID}_{ts}/correlation.html {path_to_analysis}/CARD_classification_id.csv',            
             shell=True)
 
             
