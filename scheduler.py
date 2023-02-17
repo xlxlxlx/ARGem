@@ -104,45 +104,6 @@ class PreCheck(luigi.Task):
             json.dump(data, pq_file, indent=4)
             pq_file.truncate()
 
-            #get <metadata file>
-            #sql = "SELECT `Input_File_ID` FROM `project_tasks` WHERE `Status` = 'Pending' ORDER BY `Timestamp` DESC"
-            #cursor.execute(sql)
-            #rows = cursor.fetchall()
-            #for row in rows:
-            #        self.metadata = row
-                    #break
-
-            #get <project ID>
-            #sql = "SELECT `Project_ID` FROM `project_tasks` WHERE `Status` = 'Pending' ORDER BY `Timestamp` DESC"
-            #cursor.execute(sql)
-            #rows = cursor.fetchall()
-            #for row in rows:
-            #        self.proj_ID = row
-                    #break
-
-            #get <user ID>
-            #sql = "SELECT `Creator_ID` FROM `project_prime` WHERE `Project_ID` = %s"
-            #cursor.execute(sql, (self.proj_ID))
-            #rows = cursor.fetchall()
-            #for row in rows:
-            #        self.user_ID = row
-
-            #get <mge database>
-            #sql = "SELECT * FROM `project_tasks` WHERE `Status` = 'Pending' ORDER BY `Timestamp` DESC"
-            #cursor.execute(sql)
-            #rows = cursor.fetchall()
-            #for row in rows:
-            #        self.database = row
-                    #break
-
-            # now we use batch to handle the queue
-            # while data['projects'][0] != curr_project:
-            #     print("other projects are in the queue! please wait...")
-            #     time.sleep(5)
-            #     pq_file.seek(0)
-            #     data = json.load(pq_file)
-
-        # somehow the mkdir didn't work so a temperary fix here
         os.mkdir(f"{userprojs_path}/project_{self.proj_ID}_{ts}")
         print(f"{userprojs_path}/project_{self.proj_ID}_{ts}") 
         
@@ -273,8 +234,8 @@ class ShortReadsMatching(luigi.Task):
             else:
                 subprocess.run(f'python3 {path_to_readmatching}/diamond_driver.py {userprojs_path}/project_{self.proj_ID}_{ts}', shell=True)
                 print("found_annotated_file: " + str(len(glob.glob(f'{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/*.clean.card.matches.quant.normalization'))))
-                if len(glob.glob(f'{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/*.clean.card.matches.quant.normalization')) > 0:
-                    subprocess.run(f'python3 normalization2combined.py {userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/', shell=True)
+                if len(glob.glob(f'{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/*.clean.card.matches.quant.normalization')) > 0:                    
+                    subprocess.run(f'python3 /agroseek/www/wp-includes/task_scheduler/normalization2combined.py /agroseek/www/wp-includes/task_scheduler/{userprojs_path}/project_{self.proj_ID}_{ts}/shortreads_output/', shell=True)
         with self.output().open('w') as fout:
             fout.write("Short reads matching complete.\n")
 
