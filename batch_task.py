@@ -10,7 +10,7 @@ import json
 
 if __name__ == "__main__":
     db = config.DATABASE
-    shell_path = "/agroseek/www/wp-includes/task_scheduler/runscheduler.sh"
+    shell_path = "runscheduler.sh"
 
     pending_projects = []
     queued_projects = []                                                                                                                             
@@ -46,13 +46,13 @@ if __name__ == "__main__":
         project_task = f"{shell_path} {input_file} {project_id} {user_id} {mge_db} {task_id}"
         pending_projects.append(project_task)
 
-        pending_projects.append('wget "https://agroseek.cs.vt.edu/index.php/send_email_sra/?project='+str(project_id)+'&user='+str(user_id)+'&task='+str(task_id)+'" --no-check-certificate')
-        pending_projects.append('rm index.html*')
+        # Call a customized email sending script here
+        # pending_projects.append('')
         queued_projects.append("'"+str(task_id)+"'")
 
 
     ts = calendar.timegm(time.gmtime())
-    task_list_tmp = '/agroseek/www/wp-includes/task_scheduler/task_list' + str(ts)
+    task_list_tmp = 'task_list' + str(ts)
 
     with open(task_list_tmp, 'w') as f:
         for task in pending_projects:
