@@ -42,7 +42,7 @@ Example command:
 
 Two databases can be added to the shortread matching step.
  - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
- - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/
+ - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/         
 The database files can be put under:
  - driver_readmatching/diamond-annotation/bin/deeparg （for DeepARG database)
  - driver_readmatching/diamond-annotation/bin/gg13 （for GreenGenes database)
