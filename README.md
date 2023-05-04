@@ -38,7 +38,7 @@ Example command:
 - The pipeline will either start immediately (if no other projects in the queue) or be added to the queue
 - Once a project is done processing, find the project under /userprojects/. The results of each stage should be in their subdirectories.
 
-# Optional configurations on the pipeline
+## Optional configurations
 
 Two databases can be added to the shortread matching step.
  - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
@@ -56,8 +56,7 @@ If the paths to the tools (SRA Toolkit, BLAST, and DIAMOND) need to be changed, 
 
 The configurations of the short read matching step can be changed according to the README in `driver_readmatching/diamond-annotation/`
 
-
-## Files and folders
+# Files and folders
 - driver_retrieval:     folder w/ SRA retrieval driver
 - driver_readmatching:  folder w/ short read matching driver
 - driver_annotation:    folder w/ annotation driver
@@ -82,7 +81,6 @@ Once obtained, the reference database can be processed by DIAMON using a command
 This will generate a `db_name.dmnd` file. The generated `.dmnd` files need to be put under:
  - driver_annotation/databases
  - driver_readmatching/diamond-annotation/bin/card （for CARD databae)
-
 
 
 
