@@ -7,10 +7,10 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 # Prequisite
  - NCBI SRA toolkit: https://hpc.nih.gov/apps/sratoolkit.html
- - Python 3.X
- - MySQL >= 15.1
- - DIAMOND >= 0.9.12
- - BLAST >= 2.9.0
+ - Python 3: https://www.python.org/
+ - MySQL >= 15.1: https://www.mysql.com/
+ - DIAMOND >= 0.9.12: https://github.com/bbuchfink/diamond
+ - BLAST >= 2.9.0: https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html
 
 ## Python libraries
  - luigi >= 3.0
@@ -21,8 +21,13 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 # Usage
 
-## Run the pipeline
+## Install the pipeline
 - Download the entire directory of the pipeline
+- Install dependencies in Python: go to the pipeline's directory in terminal and type the following command:    
+  `pip install -r requirements_w_versions.txt`    
+- Install other listed prequisite (with URL links provided)
+
+## Run the pipeline
 - To run the pipeline, go to the pipeline's directory in terminal and type the following command:    
   `./runscheduler.sh <metadata file> <project ID> <user ID> <MGE database>`    
 Example command: 
