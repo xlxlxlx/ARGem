@@ -21,6 +21,16 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 # Usage
 
+## Run the pipeline
+- Download the entire directory of the pipeline
+- To run the pipeline, go to the pipeline's directory in terminal and type the following command:    
+  `./runscheduler.sh <metadata file> <project ID> <user ID> <MGE database>`    
+Example command: 
+  `./runscheduler.sh sample_metadata_upload_2.xlsx myProject myUser metacompare`
+- The pipeline will either start immediately (if no other projects in the queue) or be added to the queue
+- Once a project is done processing, find the project under /userprojects/. The results of each stage should be in their subdirectories.
+
+
 ## Files and folders
 - driver_retrieval:     folder w/ SRA retrieval driver
 - driver_readmatching:  folder w/ short read matching driver
@@ -31,13 +41,6 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 - README.txt:           this file
 - runscheduler.sh:      script to run the scheduler
 - scheduler.py:         scheduler script
-
-## Run the pipeline
-- to run: ./runscheduler.sh <metadata file> <project ID> <user ID> <MGE database>
-  - (example)  ./runscheduler.sh sample_metadata_upload_2.xlsx myProject myUser metacompare
-- pipeline will either start immediately (if no other projects in the queue) or be added to the queue
-- once pipeline is done running, find the project under /userprojects/
-
 
 # Reference database
  - CARD: https://card.mcmaster.ca (version 3.1.0)
