@@ -23,9 +23,12 @@ ARGem was built by research groups from Virginia Tech. This project is funded by
 
 ## Install the pipeline
 - Download the entire directory of the pipeline
-- Install dependencies in Python: go to the pipeline's directory in terminal and type the following command:    
+- Install dependencies in Python    
+  Go to the pipeline's directory in terminal and type the following command:    
   `pip install -r requirements_w_versions.txt`    
 - Install other listed prequisite (with URL links provided)
+- Create MySQL tables for the pipeline using the following command:   
+  `mysql -u username -p database_name < create_tables.sql`
 
 ## Run the pipeline
 - To run the pipeline, go to the pipeline's directory in terminal and type the following command:    
@@ -34,6 +37,24 @@ Example command:
   `./runscheduler.sh sample_metadata_upload_2.xlsx myProject myUser metacompare`
 - The pipeline will either start immediately (if no other projects in the queue) or be added to the queue
 - Once a project is done processing, find the project under /userprojects/. The results of each stage should be in their subdirectories.
+
+# Optional configurations on the pipeline
+
+Two databases can be added to the shortread matching step.
+ - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
+ - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/
+The database files can be put under:
+ - driver_readmatching/diamond-annotation/bin/deeparg （for DeepARG database)
+ - driver_readmatching/diamond-annotation/bin/gg13 （for GreenGenes database)
+
+If the paths to the tools (SRA Toolkit, BLAST, and DIAMOND) need to be changed, change the corresponding variables in:
+ - driver_retrieval/sra_retriever.py
+ - driver_assembly/megahit_driver.py
+ - driver_annotation/blast_driver.py
+ - driver_annotation/diamond_driver.py
+ - driver_annotation/annotation_driver.py
+
+The configurations of the short read matching step can be changed according to the README in `driver_readmatching/diamond-annotation/`
 
 
 ## Files and folders
@@ -62,27 +83,8 @@ This will generate a `db_name.dmnd` file. The generated `.dmnd` files need to be
  - driver_annotation/databases
  - driver_readmatching/diamond-annotation/bin/card （for CARD databae)
 
----
-
-In addition, two databases can be added to the shortread matching step.
- - DeepARG (an ARG reference database): https://doi.org/10.1186/s40168-018-0401-z
- - GreenGenes (a 16S rRNA gene database): https://greengenes.secondgenome.com/
-
-The database files can be put under:
- - driver_readmatching/diamond-annotation/bin/deeparg （for DeepARG database)
- - driver_readmatching/diamond-annotation/bin/gg13 （for GreenGenes database)
-
-The configurations of the short read matching pipeline can be changed according to the README in driver_readmatching/diamond-annotation/
 
 
-# Paths to prequisite tools
-
-If the paths to the tools (SRA Toolkit, BLAST, and DIAMOND) need to be changed, change the corresponding variables in:
- - driver_retrieval/sra_retriever.py
- - driver_assembly/megahit_driver.py
- - driver_annotation/blast_driver.py
- - driver_annotation/diamond_driver.py
- - driver_annotation/annotation_driver.py
 
 # Acknowledge
 The short read matching annotation tool is contributed by Suraj Gupta.   
